@@ -1,0 +1,16 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "shadows.placebo.fabric.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "client": [
+    "EntityRenderDispatcherMixin"
+  ],
+  "mixins": [
+    "PlayerMixin",
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "refmap": "placebo.refmap.json"
+}

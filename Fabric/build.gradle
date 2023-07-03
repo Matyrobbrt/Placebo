@@ -1,0 +1,73 @@
+plugins {
+    id 'fabric-loom' version '1.1.+'
+    id 'maven-publish'
+    id 'idea'
+}
+
+archivesBaseName = "${mod_name}-fabric-${minecraft_version}"
+
+dependencies {
+    minecraft "com.mojang:minecraft:${minecraft_version}"
+    mappings loom.officialMojangMappings()
+    modImplementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_version}+${minecraft_version}"
+    implementation group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.1'
+    compileOnly project(":Common")
+
+    include modApi('teamreborn:energy:2.3.0') {
+        exclude(group: 'net.fabricmc.fabric-api')
+    }
+
+    include 'io.github.matyrobbrt:eventdispatcher:1.8.0'
+    implementation 'io.github.matyrobbrt:eventdispatcher:1.8.0'
+}
+
+loom {
+    mixin {
+        add('main', 'placebo.refmap.json') {
+            include 'placebo.mixins.json'
+            include 'placebo_fabric.mixins.json'
+        }
+    }
+    runs {
+        client {
+            client()
+            setConfigName("Fabric Client")
+            ideConfigGenerated(true)
+            runDir("run")
+        }
+        server {
+            server()
+            setConfigName("Fabric Server")
+            ideConfigGenerated(true)
+            runDir("run")
+        }
+    }
+    accessWidenerPath.set(file('../Common/src/main/resources/placebo.accesswidener'))
+}
+
+
+processResources {
+    from project(":Common").sourceSets.main.resources
+    filesMatching("${mod_id}.mixins.json") {
+        expand "refmap_target": "${archivesBaseName}-"
+    }
+}
+
+tasks.withType(JavaCompile) {
+    source(project(":Common").sourceSets.main.allSource)
+}
+
+publishing {
+    publications {
+        register('mavenJava', MavenPublication) {
+            groupId = 'shadows.placebo'
+            artifactId = "placebo-${minecraft_version}-fabric"
+            version = project.version
+            from components.java
+        }
+    }
+    repositories {
+        mavenLocal()
+    }
+}

@@ -1,0 +1,200 @@
+import org.apache.commons.io.IOUtils
+
+import java.nio.file.Files
+import java.util.zip.ZipEntry
+import java.util.zip.ZipInputStream
+
+buildscript {
+    repositories {
+        maven { url = 'https://maven.minecraftforge.net' }
+        mavenCentral()
+    }
+    dependencies {
+        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '6.0.+', changing: true
+        classpath 'org.spongepowered:mixingradle:0.7.+'
+    }
+}
+apply plugin: 'java'
+apply plugin: 'net.minecraftforge.gradle'
+apply plugin: 'eclipse'
+apply plugin: 'maven-publish'
+apply plugin: 'org.spongepowered.mixin'
+
+archivesBaseName = "${mod_name}-forge-${minecraft_version}"
+
+mixin {
+    add sourceSets.main, "${mod_id}.refmap.json"
+    config "${mod_id}.mixins.json"
+}
+
+sourceSets {
+    dep
+}
+
+configurations {
+    library {
+        transitive = false
+    }
+    implementation.extendsFrom library
+
+    jarJar {
+        transitive = false
+    }
+}
+
+jarJar.enable()
+
+minecraft {
+    mappings channel: 'official', version: minecraft_version
+
+    accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
+
+    runs {
+        all {
+            lazyToken('minecraft_classpath') {
+                // configurations.library.copyRecursive().resolve().collect { it.absolutePath }.join(File.pathSeparator)
+            }
+        }
+
+        client {
+            workingDirectory project.file('run')
+            ideaModule "${rootProject.name}.${project.name}.main"
+            taskName 'Client'
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
+            mods {
+                modClientRun {
+                    source sourceSets.dep
+                    source sourceSets.main
+//                    source project(":Common").sourceSets.main
+                }
+            }
+        }
+
+        server {
+            workingDirectory project.file('run')
+            ideaModule "${rootProject.name}.${project.name}.main"
+            taskName 'Server'
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
+            mods {
+                modServerRun {
+                    source sourceSets.dep
+                    source sourceSets.main
+//                    source project(":Common").sourceSets.main
+                }
+            }
+        }
+
+        data {
+            workingDirectory project.file('run')
+            ideaModule "${rootProject.name}.${project.name}.main"
+            args '--mod', mod_id, '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
+            taskName 'Data'
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
+            mods {
+                modDataRun {
+                    source sourceSets.dep
+                    source sourceSets.main
+//                    source project(":Common").sourceSets.main
+                }
+            }
+        }
+    }
+}
+
+sourceSets.main.resources.srcDir 'src/generated/resources'
+
+dependencies {
+    minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
+    compileOnly(project(":Common")) {
+        exclude group: 'net.fabricmc'
+    }
+    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
+    jarJar(library('io.github.matyrobbrt:asmutils:0.4.0')) {
+        jarJar.ranged(it, '[0.4.0,1.0.0)')
+        transitive = false
+    }
+    jarJar(library('io.github.matyrobbrt:eventdispatcher:1.8.0')) {
+        jarJar.ranged(it, '[1.8.0,2.0.0)')
+        transitive = false
+    }
+}
+
+tasks.named('compileJava', JavaCompile) {
+    source(project(":Common").sourceSets.main.allSource)
+}
+
+tasks.register('unpackDeps', Unzip) {
+    getInput().from(configurations.getByName('library').resolve())
+    output = project.file('build/unpackdeps')
+}
+
+tasks.named('processDepResources') {
+    dependsOn('unpackDeps')
+    from(project.file('build/unpackdeps')) {
+        exclude 'META-INF/**'
+    }
+}
+
+processResources {
+    from project(":Common").sourceSets.main.resources
+    //from(project.file("$buildDir/tmp/compileJava/placebo.refmap.json"))
+    filesMatching("${mod_id}.mixins.json") {
+        expand "refmap_target": "${mod_id}."
+    }
+}
+
+reobf {
+    jarJar
+}
+tasks.jar.finalizedBy('reobfJar')
+tasks.jarJar.finalizedBy('reobfJarJar')
+
+tasks.configureEach {
+    if (it.name.startsWith('reobf')) {
+        it.extraMappings.from(project.file("$buildDir/tmp/compileJava/compileJava-mappings.tsrg"))
+    }
+}
+
+publishing {
+    publications {
+        register('mavenJava', MavenPublication) {
+            groupId = 'shadows.placebo'
+            artifactId = "placebo-${minecraft_version}-forge"
+            version = project.version
+            from components.java
+            artifact tasks.jarJar
+        }
+    }
+    repositories {
+        mavenLocal()
+    }
+}
+
+abstract class Unzip extends DefaultTask {
+    @InputFiles
+    abstract ConfigurableFileCollection getInput()
+
+    @OutputDirectory
+    abstract RegularFileProperty getOutput()
+
+    @TaskAction
+    void run() {
+        final out = output.get().asFile.toPath()
+        if (Files.exists(out)) output.get().asFile.deleteDir()
+        input.forEach { file ->
+            try (final zin = new ZipInputStream(new FileInputStream(file))) {
+                ZipEntry entry
+                while ((entry = zin.nextEntry) !== null) {
+                    if (!entry.directory) {
+                        final pth = out.resolve(entry.name)
+                        Files.createDirectories(pth.parent)
+                        Files.write(pth, IOUtils.toByteArray(zin))
+                    }
+                }
+            }
+        }
+    }
+}
