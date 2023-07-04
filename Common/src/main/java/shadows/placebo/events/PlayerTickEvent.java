@@ -5,7 +5,7 @@ import io.github.matyrobbrt.eventdispatcher.internal.EventDispatcher;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 
-public record PlayerTickEvent(Player player, PlayerTickEvent.Phase phase) implements Event {
+public record PlayerTickEvent(Player player, Phase phase) implements Event {
     public static final EventDispatcher DISPATCHER = new EventDispatcher();
 
     @Override

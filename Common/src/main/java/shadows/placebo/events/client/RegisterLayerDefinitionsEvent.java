@@ -4,8 +4,9 @@ import io.github.matyrobbrt.eventdispatcher.Event;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 
-import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
-public record RegisterLayerDefinitionsEvent(BiConsumer<ModelLayerLocation, Supplier<LayerDefinition>> registrar) implements Event {
+@FunctionalInterface
+public interface RegisterLayerDefinitionsEvent extends Event {
+    void register(ModelLayerLocation location, Supplier<LayerDefinition> definition);
 }

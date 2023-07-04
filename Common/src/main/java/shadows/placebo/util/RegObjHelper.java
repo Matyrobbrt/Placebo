@@ -4,6 +4,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
@@ -40,71 +41,71 @@ public class RegObjHelper {
 	}
 
 	public <T extends Block> RegistryObject<T> block(String path) {
-		return create(modid, path, Registry.BLOCK);
+		return create(modid, path, BuiltInRegistries.BLOCK);
 	}
 
 	public <T extends Fluid> RegistryObject<T> fluid(String path) {
-		return create(modid, path, Registry.FLUID);
+		return create(modid, path, BuiltInRegistries.FLUID);
 	}
 
 	public <T extends Item> RegistryObject<T> item(String path) {
-		return create(modid, path, Registry.ITEM);
+		return create(modid, path, BuiltInRegistries.ITEM);
 	}
 
 	public <T extends MobEffect> RegistryObject<T> effect(String path) {
-		return create(modid, path, Registry.MOB_EFFECT);
+		return create(modid, path, BuiltInRegistries.MOB_EFFECT);
 	}
 
 	public <T extends SoundEvent> RegistryObject<T> sound(String path) {
-		return create(modid, path, Registry.SOUND_EVENT);
+		return create(modid, path, BuiltInRegistries.SOUND_EVENT);
 	}
 
 	public <T extends Potion> RegistryObject<T> potion(String path) {
-		return create(modid, path, Registry.POTION);
+		return create(modid, path, BuiltInRegistries.POTION);
 	}
 
 	public <T extends Enchantment> RegistryObject<T> enchant(String path) {
-		return create(modid, path, Registry.ENCHANTMENT);
+		return create(modid, path, BuiltInRegistries.ENCHANTMENT);
 	}
 
 	public <U extends Entity, T extends EntityType<U>> RegistryObject<T> entity(String path) {
-		return create(modid, path, Registry.ENTITY_TYPE);
+		return create(modid, path, BuiltInRegistries.ENTITY_TYPE);
 	}
 
 	public <U extends BlockEntity, T extends BlockEntityType<U>> RegistryObject<T> blockEntity(String path) {
-		return create(modid, path, Registry.BLOCK_ENTITY_TYPE);
+		return create(modid, path, BuiltInRegistries.BLOCK_ENTITY_TYPE);
 	}
 
 	public <U extends ParticleOptions, T extends ParticleType<U>> RegistryObject<T> particle(String path) {
-		return create(modid, path, Registry.PARTICLE_TYPE);
+		return create(modid, path, BuiltInRegistries.PARTICLE_TYPE);
 	}
 
 	public <U extends AbstractContainerMenu, T extends MenuType<U>> RegistryObject<T> menu(String path) {
-		return create(modid, path, Registry.MENU);
+		return create(modid, path, BuiltInRegistries.MENU);
 	}
 
 	public <T extends PaintingVariant> RegistryObject<T> painting(String path) {
-		return create(modid, path, Registry.PAINTING_VARIANT);
+		return create(modid, path, BuiltInRegistries.PAINTING_VARIANT);
 	}
 
 	public <C extends Container, U extends Recipe<C>, T extends RecipeType<U>> RegistryObject<T> recipe(String path) {
-		return create(modid, path, Registry.RECIPE_TYPE);
+		return create(modid, path, BuiltInRegistries.RECIPE_TYPE);
 	}
 
 	public <C extends Container, U extends Recipe<C>, T extends RecipeSerializer<U>> RegistryObject<T> recipeSerializer(String path) {
-		return create(modid, path, Registry.RECIPE_SERIALIZER);
+		return create(modid, path, BuiltInRegistries.RECIPE_SERIALIZER);
 	}
 
 	public <T extends Attribute> RegistryObject<T> attribute(String path) {
-		return create(modid, path, Registry.ATTRIBUTE);
+		return create(modid, path, BuiltInRegistries.ATTRIBUTE);
 	}
 
 	public <S, U extends Stat<S>, T extends StatType<U>> RegistryObject<T> stat(String path) {
-		return create(modid, path, Registry.STAT_TYPE);
+		return create(modid, path, BuiltInRegistries.STAT_TYPE);
 	}
 
 	public <U extends FeatureConfiguration, T extends Feature<U>> RegistryObject<T> feature(String path) {
-		return create(modid, path, Registry.FEATURE);
+		return create(modid, path, BuiltInRegistries.FEATURE);
 	}
 
 	public <T> RegistryObject<T> custom(String path, Registry<T> registry) {

@@ -1,4 +1,4 @@
-//package shadows.placebo.network;
+package shadows.placebo.network;//package shadows.placebo.network;
 //
 //import net.minecraft.core.BlockPos;
 //import net.minecraft.server.level.ServerLevel;

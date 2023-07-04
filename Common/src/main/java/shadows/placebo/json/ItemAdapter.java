@@ -14,6 +14,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
@@ -34,7 +35,7 @@ public class ItemAdapter implements JsonDeserializer<ItemStack>, JsonSerializer<
 	//Formatter::off
 	public static final Codec<ItemStack> CODEC = RecordCodecBuilder.create(inst -> inst
 			.group(
-					Registry.ITEM.byNameCodec().fieldOf("item").forGetter(ItemStack::getItem),
+					BuiltInRegistries.ITEM.byNameCodec().fieldOf("item").forGetter(ItemStack::getItem),
 					Codec.intRange(0, 64).optionalFieldOf("count", 1).forGetter(ItemStack::getCount),
 					CompoundTag.CODEC.optionalFieldOf("nbt").forGetter(stack -> Optional.ofNullable(stack.getTag())))
 			.apply(inst, (item, count, nbt) -> {
@@ -50,9 +51,9 @@ public class ItemAdapter implements JsonDeserializer<ItemStack>, JsonSerializer<
 	public ItemStack deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext ctx) throws JsonParseException {
 		JsonObject obj = json.getAsJsonObject();
 		ResourceLocation id = ctx.deserialize(obj.get("item"), ResourceLocation.class);
-		Item item = Registry.ITEM.get(id);
+		Item item = BuiltInRegistries.ITEM.get(id);
 		boolean optional = obj.has("optional") ? obj.get("optional").getAsBoolean() : false;
-		if (!optional && item == Items.AIR && !id.equals(Registry.ITEM.getKey(Items.AIR))) throw new JsonParseException("Failed to read non-optional item " + id);
+		if (!optional && item == Items.AIR && !id.equals(BuiltInRegistries.ITEM.getKey(Items.AIR))) throw new JsonParseException("Failed to read non-optional item " + id);
 		int count = obj.has("count") ? obj.get("count").getAsInt() : 1;
 		CompoundTag tag = null;
 		if (obj.has("nbt")) {
@@ -71,7 +72,7 @@ public class ItemAdapter implements JsonDeserializer<ItemStack>, JsonSerializer<
 	@Override
 	public JsonElement serialize(ItemStack stack, Type typeOfSrc, JsonSerializationContext ctx) {
 		JsonObject obj = new JsonObject();
-		obj.add("item", ctx.serialize(Registry.ITEM.getKey(stack.getItem())));
+		obj.add("item", ctx.serialize(BuiltInRegistries.ITEM.getKey(stack.getItem())));
 		obj.add("count", ctx.serialize(stack.getCount()));
 		if (stack.hasTag()) obj.add("nbt", ctx.serialize(stack.getTag()));
 		return obj;

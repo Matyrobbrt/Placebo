@@ -1,0 +1,13 @@
+{
+  "values": [
+    {
+      "id": "#forge:ingots/netherite",
+      "required": false
+    },
+    {
+      "id": "#c:netherite_ingots",
+      "required": false
+    },
+    "minecraft:netherite_ingot"
+  ]
+}

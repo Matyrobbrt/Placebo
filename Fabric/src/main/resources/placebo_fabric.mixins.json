@@ -4,10 +4,11 @@
   "package": "shadows.placebo.fabric.mixin",
   "compatibilityLevel": "JAVA_17",
   "client": [
+    "AbstractContainerScreenMixin",
     "EntityRenderDispatcherMixin"
   ],
   "mixins": [
-    "PlayerMixin",
+    "PlayerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

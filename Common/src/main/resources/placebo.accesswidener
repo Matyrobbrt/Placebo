@@ -8,9 +8,10 @@ accessible field net/minecraft/world/level/storage/loot/LootPool$Builder functio
 accessible field net/minecraft/network/chat/TextColor NAMED_COLORS Ljava/util/Map;
 accessible class net/minecraft/client/gui/screens/MenuScreens$ScreenConstructor
 accessible class net/minecraft/world/inventory/MenuType$MenuSupplier
-accessible method net/minecraft/world/inventory/MenuType <init> (Lnet/minecraft/world/inventory/MenuType$MenuSupplier;)V
+accessible method net/minecraft/world/inventory/MenuType <init> (Lnet/minecraft/world/inventory/MenuType$MenuSupplier;Lnet/minecraft/world/flag/FeatureFlagSet;)V
 accessible method net/minecraft/server/level/ServerPlayer nextContainerCounter ()V
 accessible field net/minecraft/server/level/ServerPlayer containerCounter I
 accessible method net/minecraft/server/level/ServerPlayer initMenu (Lnet/minecraft/world/inventory/AbstractContainerMenu;)V
 accessible field net/minecraft/world/item/crafting/RecipeManager recipes Ljava/util/Map;
 accessible field net/minecraft/world/item/crafting/RecipeManager byName Ljava/util/Map;
+accessible class net/minecraft/server/MinecraftServer$ReloadableResources

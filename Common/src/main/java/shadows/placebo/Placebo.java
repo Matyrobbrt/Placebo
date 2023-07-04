@@ -16,6 +16,7 @@ import shadows.placebo.events.RegisterCommandsEvent;
 import shadows.placebo.mixin.access.TextColorAccessor;
 import shadows.placebo.network.NetworkChannel;
 import shadows.placebo.packets.ButtonClickMessage;
+import shadows.placebo.packets.OpenContainer;
 import shadows.placebo.packets.PatreonDisableMessage;
 import shadows.placebo.packets.ReloadListenerPacket;
 import shadows.placebo.platform.Services;
@@ -47,11 +48,6 @@ public class Placebo {
 	}
 
 	public Placebo() {
-		try {
-			Class.forName("io.github.matyrobbrt.asmutils.wrapper.ConsumerWrapper");
-		} catch (ClassNotFoundException e) {
-			throw new RuntimeException(e);
-		}
 		BUS.start();
 		TextColorAccessor.setNamedColors(new HashMap<>(TextColor.NAMED_COLORS));
 		BUS.register(Placebo.class);
@@ -65,6 +61,7 @@ public class Placebo {
 		CHANNEL.registerMessage(new ReloadListenerPacket.Start(""));
 		CHANNEL.registerMessage(new ReloadListenerPacket.Content<>("", null, null));
 		CHANNEL.registerMessage(new ReloadListenerPacket.End(""));
+		CHANNEL.registerMessage(new OpenContainer());
 		e.enqueue(() -> PlaceboUtil.registerCustomColor(GradientColor.RAINBOW));
 	}
 

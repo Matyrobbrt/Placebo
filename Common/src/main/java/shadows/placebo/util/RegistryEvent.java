@@ -5,6 +5,7 @@ import io.github.matyrobbrt.eventdispatcher.Event;
 import io.github.matyrobbrt.eventdispatcher.GenericEvent;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleType;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
@@ -14,6 +15,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.decoration.PaintingVariant;
 import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.crafting.RecipeSerializer;
@@ -21,11 +23,10 @@ import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.material.Fluid;
 
 import java.lang.reflect.Type;
-import java.util.List;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -35,24 +36,24 @@ import static com.mojang.datafixers.util.Pair.of;
 public class RegistryEvent<T> implements Event, GenericEvent<T> {
 
 	public static final Map<ResourceKey<? extends Registry<?>>, Class<?>> REGISTRIES_TO_FIRE = Stream.of(
-			of(Block.class, Registry.BLOCK_REGISTRY),
-			of(Fluid.class, Registry.FLUID_REGISTRY),
-			of(Item.class, Registry.ITEM_REGISTRY),
-			of(MobEffect.class, Registry.MOB_EFFECT_REGISTRY),
-			of(SoundEvent.class, Registry.SOUND_EVENT_REGISTRY),
-			of(Potion.class, Registry.POTION_REGISTRY),
-			of(Enchantment.class, Registry.ENCHANTMENT_REGISTRY),
-			of(EntityType.class, Registry.ENTITY_TYPE_REGISTRY),
-			of(BlockEntityType.class, Registry.BLOCK_ENTITY_TYPE_REGISTRY),
-			of(ParticleType.class, Registry.PARTICLE_TYPE_REGISTRY),
-			of(MenuType.class, Registry.MENU_REGISTRY),
-			of(PaintingVariant.class, Registry.PAINTING_VARIANT_REGISTRY),
-			of(RecipeType.class, Registry.RECIPE_TYPE_REGISTRY),
-			of(RecipeSerializer.class, Registry.RECIPE_SERIALIZER_REGISTRY),
-			of(Attribute.class, Registry.ATTRIBUTE_REGISTRY),
-			of(StatType.class, Registry.STAT_TYPE_REGISTRY),
-			of(Feature.class, Registry.FEATURE_REGISTRY)
-	).collect(Collectors.toMap(Pair::getSecond, Pair::getFirst));
+			of(Block.class, Registries.BLOCK),
+			of(Fluid.class, Registries.FLUID),
+			of(Item.class, Registries.ITEM),
+			of(MobEffect.class, Registries.MOB_EFFECT),
+			of(SoundEvent.class, Registries.SOUND_EVENT),
+			of(Potion.class, Registries.POTION),
+			of(Enchantment.class, Registries.ENCHANTMENT),
+			of(EntityType.class, Registries.ENTITY_TYPE),
+			of(BlockEntityType.class, Registries.BLOCK_ENTITY_TYPE),
+			of(ParticleType.class, Registries.PARTICLE_TYPE),
+			of(MenuType.class, Registries.MENU),
+			of(PaintingVariant.class, Registries.PAINTING_VARIANT),
+			of(RecipeType.class, Registries.RECIPE_TYPE),
+			of(RecipeSerializer.class, Registries.RECIPE_SERIALIZER),
+			of(Attribute.class, Registries.ATTRIBUTE),
+			of(StatType.class, Registries.STAT_TYPE),
+			of(CreativeModeTab.class, Registries.CREATIVE_MODE_TAB)
+	).collect(Collectors.toMap(Pair::getSecond, Pair::getFirst, (aClass, aClass2) -> aClass2, LinkedHashMap::new));
 
 	private final Class<T> clazz;
 	RegistryEvent(Class<T> clazz) {

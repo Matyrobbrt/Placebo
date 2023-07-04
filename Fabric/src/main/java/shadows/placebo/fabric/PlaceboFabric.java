@@ -10,6 +10,9 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.api.resource.conditions.v1.ResourceConditions;
+import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -19,9 +22,12 @@ import org.jetbrains.annotations.Nullable;
 import shadows.placebo.Placebo;
 import shadows.placebo.events.CommonSetupEvent;
 import shadows.placebo.events.DatapackSyncEvent;
+import shadows.placebo.events.ModEventBus;
 import shadows.placebo.events.RegisterCommandsEvent;
 import shadows.placebo.events.RegisterReloadListenersEvent;
+import shadows.placebo.fabric.api.PlaceboInitEntrypoint;
 import shadows.placebo.json.ConditionHelper;
+import shadows.placebo.util.RegistryEvent;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -30,7 +36,10 @@ import java.util.function.Predicate;
 public class PlaceboFabric implements ModInitializer {
     @Override
     public void onInitialize() {
-        Placebo.BUS.post(new CommonSetupEvent(Runnable::run));
+        FabricLoader.getInstance().getEntrypointContainers("placeboInit", PlaceboInitEntrypoint.class)
+                    .forEach(container -> container.getEntrypoint().run(ModEventBus.grabBus(container.getProvider().getMetadata().getId())));
+        Placebo.init();
+
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) ->
                 Placebo.BUS.post(new RegisterCommandsEvent(dispatcher)));
         fireReloadListenerEvent(PackType.SERVER_DATA, (object, conditionsArrayName, logger) -> {
@@ -51,10 +60,27 @@ public class PlaceboFabric implements ModInitializer {
 
         ServerLifecycleEvents.SYNC_DATA_PACK_CONTENTS.register((player, joined) ->
                 Placebo.BUS.post(new DatapackSyncEvent(player)));
+
+        RegistryEvent.Register.REGISTRIES_TO_FIRE.forEach((key, type) -> {
+            final Registry registry = BuiltInRegistries.REGISTRY.get(key.location());
+            ModEventBus.forEachBus((modId, bus) -> bus.post(new RegistryEvent.Register(type, registry, new RegistryEvent.RegistryWrapper() {
+                @Override
+                public void register(Object object, String id) {
+                    Registry.register(registry, new ResourceLocation(modId, id), object);
+                }
+
+                @Override
+                public void register(Object object, ResourceLocation id) {
+                    Registry.register(registry, id, object);
+                }
+            })));
+        });
+
+        Placebo.BUS.<CommonSetupEvent>post(Runnable::run);
     }
 
     private void fireReloadListenerEvent(PackType type, @Nullable ConditionHelper conditions) {
-        final ResourceManagerHelper helper = ResourceManagerHelper.get(PackType.CLIENT_RESOURCES);
+        final ResourceManagerHelper helper = ResourceManagerHelper.get(type);
         Placebo.BUS.post(new RegisterReloadListenersEvent(
                 type, conditions, (location, preparableReloadListener) -> helper.registerReloadListener(new IdentifiableResourceReloadListener() {
                     @Override

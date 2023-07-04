@@ -33,7 +33,7 @@ ModsDotGroovy.make {
 
         entrypoints {
             main = 'shadows.placebo.fabric.PlaceboFabric'
-            client = 'shadows.placebo.fabric.PlaceboFabricClient'
+            client = 'shadows.placebo.fabric.client.PlaceboFabricClient'
         }
     }
 

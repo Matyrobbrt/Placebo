@@ -6,6 +6,23 @@ plugins {
 
 archivesBaseName = "${mod_name}-fabric-${minecraft_version}"
 
+repositories {
+    maven {
+        name = 'TerraformersMC'
+        url = 'https://maven.terraformersmc.com/'
+        content {
+            includeGroup 'dev.emi'
+        }
+    }
+    maven {
+        name = 'Ladysnake'
+        url = 'https://ladysnake.jfrog.io/artifactory/mods'
+        content {
+            includeGroupByRegex 'dev\\.onyxstudios.+'
+        }
+    }
+}
+
 dependencies {
     minecraft "com.mojang:minecraft:${minecraft_version}"
     mappings loom.officialMojangMappings()
@@ -14,12 +31,19 @@ dependencies {
     implementation group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.1'
     compileOnly project(":Common")
 
-    include modApi('teamreborn:energy:2.3.0') {
+    include modApi('teamreborn:energy:3.0.0') {
         exclude(group: 'net.fabricmc.fabric-api')
     }
 
-    include 'io.github.matyrobbrt:eventdispatcher:1.8.0'
-    implementation 'io.github.matyrobbrt:eventdispatcher:1.8.0'
+    include(implementation(annotationProcessor("com.github.llamalad7.mixinextras:mixinextras-fabric:${mixinextras_version}")))
+    include(implementation("io.github.matyrobbrt:eventdispatcher:${eventdispatcher_version}"))
+    include("io.github.matyrobbrt:asmutils:${asmutils_version}")
+
+    modImplementation("dev.emi:trinkets:${trinkets_version}") {
+        exclude(group: 'net.fabricmc')
+    }
+    modImplementation "dev.onyxstudios.cardinal-components-api:cardinal-components-base:${project.cca_version}"
+    modImplementation "dev.onyxstudios.cardinal-components-api:cardinal-components-entity:${project.cca_version}"
 }
 
 loom {
@@ -49,12 +73,15 @@ loom {
 
 processResources {
     from project(":Common").sourceSets.main.resources
+    from(file('../Forge/src/generated/resources')) {
+        exclude '.cache/**'
+    }
     filesMatching("${mod_id}.mixins.json") {
-        expand "refmap_target": "${archivesBaseName}-"
+        expand "refmap_target": "${mod_id}."
     }
 }
 
-tasks.withType(JavaCompile) {
+tasks.withType(JavaCompile).configureEach {
     source(project(":Common").sourceSets.main.allSource)
 }
 
@@ -65,6 +92,45 @@ publishing {
             artifactId = "placebo-${minecraft_version}-fabric"
             version = project.version
             from components.java
+
+            pom {
+                withXml { XmlProvider xml ->
+                    final element = xml.asElement()
+                    for (int i = 0; i < element.childNodes.length; i++) {
+                        final child = element.childNodes.item(i)
+                        if (child.nodeName == 'dependencies')
+                            element.removeChild(child)
+                    }
+
+                    final createDependency = { org.w3c.dom.Document owner, String group, String name, String version, String scope ->
+                        var sub = owner.createElement('dependency')
+
+                        var groupEl = owner.createElement('groupId')
+                        groupEl.appendChild(owner.createTextNode(group))
+                        sub.appendChild groupEl
+
+                        var artEl = owner.createElement('artifactId')
+                        artEl.appendChild(owner.createTextNode(name))
+                        sub.appendChild artEl
+
+                        var verEl = owner.createElement('version')
+                        verEl.appendChild(owner.createTextNode(version))
+                        sub.appendChild verEl
+
+                        var scopeEl = owner.createElement('scope')
+                        scopeEl.appendChild(owner.createTextNode(scope))
+                        sub.appendChild scopeEl
+
+                        return sub
+                    }
+
+                    final depsElem = element.getOwnerDocument().createElement('dependencies')
+                    final owner = element.getOwnerDocument()
+                    depsElem.appendChild(createDependency(owner, 'io.github.matyrobbrt', 'eventdispatcher', "${eventdispatcher_version}", 'compile'))
+                    depsElem.appendChild(createDependency(owner, 'com.github.llamalad7.mixinextras', 'mixinextras-fabric', "${mixinextras_version}", 'runtime'))
+                    element.appendChild(depsElem)
+                }
+            }
         }
     }
     repositories {

@@ -26,6 +26,7 @@ import shadows.placebo.Placebo;
 import shadows.placebo.events.DatapackSyncEvent;
 import shadows.placebo.events.RegisterReloadListenersEvent;
 import shadows.placebo.packets.ReloadListenerPacket;
+import shadows.placebo.platform.Services;
 import shadows.placebo.util.PlaceboTaskQueue;
 
 /**
@@ -223,7 +224,7 @@ public abstract class PlaceboJsonReloadListener<V extends TypeKeyed<V>> extends 
 	 * @return True if the item's conditions are met, false otherwise.
 	 */
 	public static boolean checkConditions(JsonElement e, ResourceLocation id, String type, Logger logger, ConditionHelper conditionHelper) {
-		if (e.isJsonObject() && !conditionHelper.shouldBeLoaded(e.getAsJsonObject(), "conditions", logger)) {
+		if (e.isJsonObject() && !conditionHelper.shouldBeLoaded(e.getAsJsonObject(), Services.PLATFORM.getPlatform().getConditionsName(), logger)) {
 			logger.debug("Skipping loading {} item with id {} as it's conditions were not met", type, id);
 			return false;
 		}
@@ -273,8 +274,8 @@ public abstract class PlaceboJsonReloadListener<V extends TypeKeyed<V>> extends 
 	private void addReloader(RegisterReloadListenersEvent e) {
 		if (e.getType() == PackType.SERVER_DATA) {
 			e.register(new ResourceLocation("placebo", "json_registry_" + path), this);
+			this.conditions = e.getConditions();
 		}
-		this.conditions = e.getConditions();
 	}
 
 	/**

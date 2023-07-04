@@ -59,7 +59,7 @@ public class ModifiableEnergyStorage extends EnergyStorage implements PlaceboEne
 
 	@Override
 	public void setMaxInsert(int maxInsert) {
-
+		this.maxReceive = maxInsert;
 	}
 
 	public void setMaxReceive(int receive) {

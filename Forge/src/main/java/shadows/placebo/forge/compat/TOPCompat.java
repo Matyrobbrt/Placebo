@@ -1,4 +1,4 @@
-//package shadows.placebo.forge.compat;
+package shadows.placebo.forge.compat;//package shadows.placebo.forge.compat;
 //
 //import java.util.ArrayList;
 //import java.util.List;

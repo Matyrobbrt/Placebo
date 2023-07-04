@@ -11,6 +11,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import shadows.placebo.block_entity.TickingBlockEntity;
 import shadows.placebo.network.NetworkChannel;
+import shadows.placebo.platform.PlatformType;
 
 import java.nio.file.Path;
 import java.util.Set;
@@ -45,6 +46,8 @@ public interface IPlatformHelper {
     Path getConfigDir();
 
     String getModVersion();
+
+    PlatformType getPlatform();
 
     <T extends BlockEntity & TickingBlockEntity> BlockEntityType<T> createTickingBEType(BlockEntitySupplier<T> supplier, Set<Block> blocks, boolean ticksOnClient, boolean ticksOnServer);
 

@@ -11,6 +11,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.commands.LootCommand;
 import net.minecraft.world.level.storage.loot.Deserializers;
 import net.minecraft.world.level.storage.loot.LootTable;
+import shadows.placebo.mixin.access.MinecraftServerAccessor;
 import shadows.placebo.platform.Services;
 
 import java.io.IOException;
@@ -26,12 +27,12 @@ public class SerializeLootTableCommand {
 	public static void register(LiteralArgumentBuilder<CommandSourceStack> builder) {
 		builder.then(Commands.literal("serialize_loot_table").requires(s -> s.hasPermission(2)).then(Commands.argument("loot_table", ResourceLocationArgument.id()).suggests(LootCommand.SUGGEST_LOOT_TABLE).executes(ctx -> {
 			ResourceLocation id = ResourceLocationArgument.getId(ctx, "loot_table");
-			LootTable table = ctx.getSource().getServer().getLootTables().get(id);
+			LootTable table = ((MinecraftServerAccessor) ctx.getSource().getServer()).placebo$getResources().managers().getLootData().getLootTable(id);
 			if (table == LootTable.EMPTY) throw NOT_FOUND.create(id);
 			String path = "placebo_serialized/" + id.getNamespace() + "/loot_tables/" + id.getPath() + ".json";
 			Path file = Services.PLATFORM.getGameDir().resolve(path);
 			if (attemptSerialize(table, file)) {
-				ctx.getSource().sendSuccess(Component.translatable("placebo.cmd.serialize_success", id, path), true);
+				ctx.getSource().sendSuccess(() -> Component.translatable("placebo.cmd.serialize_success", id, path), true);
 			} else ctx.getSource().sendFailure(Component.translatable("placebo.cmd.serialize_failure"));
 			return 0;
 		})));

@@ -3,7 +3,9 @@ package shadows.placebo.packets;
 import io.netty.buffer.Unpooled;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.MenuScreens;
+import net.minecraft.client.gui.screens.inventory.MenuAccess;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -23,7 +25,7 @@ public class OpenContainer implements MessageProvider<OpenContainer> {
     private FriendlyByteBuf additionalData;
 
     public OpenContainer(MenuType<?> id, int windowId, Component name, FriendlyByteBuf additionalData) {
-        this(Registry.MENU.getKey(id), windowId, name, additionalData);
+        this(BuiltInRegistries.MENU.getKey(id), windowId, name, additionalData);
     }
 
     public OpenContainer(ResourceLocation id, int windowId, Component name, FriendlyByteBuf additionalData) {
@@ -55,10 +57,11 @@ public class OpenContainer implements MessageProvider<OpenContainer> {
 
     private void handleClient() {
         try {
-            final var menu = Registry.MENU.get(id);
+            final var menu = BuiltInRegistries.MENU.get(id);
             final var inv = Minecraft.getInstance().player.getInventory();
             final var factory = (PlaceboContainerFactory) ((MenuTypeAccessor) menu).getConstructor();
             final var container = factory.create(windowId, inv, getAdditionalData());
+            Minecraft.getInstance().player.containerMenu = container;
             Minecraft.getInstance().setScreen(((MenuScreens.ScreenConstructor)MenuScreensAccessor.placebo$getConstructor(menu)).create(
                     container, inv, getName()
             ));

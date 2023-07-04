@@ -100,6 +100,6 @@ public class PlaceboForge {
         });
 
         FMLJavaModLoadingContext.get().getModEventBus().addListener((final FMLCommonSetupEvent event) ->
-                Placebo.BUS.post(new CommonSetupEvent(event::enqueueWork)));
+                Placebo.BUS.<CommonSetupEvent>post(event::enqueueWork));
     }
 }

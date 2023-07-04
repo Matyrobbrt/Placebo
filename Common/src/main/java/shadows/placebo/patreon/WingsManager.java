@@ -34,8 +34,7 @@ public class WingsManager {
 	public static final ModelLayerLocation WING_LOC = new ModelLayerLocation(new ResourceLocation(Placebo.MODID, "wings"), "main");
 
 	public static void init(ClientSetupEvent e) {
-		Placebo.BUS.addListener((final RegisterLayerDefinitionsEvent event) ->
-				event.registrar().accept(WING_LOC, Wing::createLayer));
+		Placebo.BUS.addListener((final RegisterLayerDefinitionsEvent event) -> event.register(WING_LOC, Wing::createLayer));
 		Placebo.BUS.addListener(WingsManager::addLayers);
 		new Thread(() -> {
 			Placebo.LOGGER.info("Loading patreon wing data...");

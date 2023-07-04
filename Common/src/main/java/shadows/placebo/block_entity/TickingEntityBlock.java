@@ -1,6 +1,7 @@
 package shadows.placebo.block_entity;
 
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -18,7 +19,7 @@ public interface TickingEntityBlock extends EntityBlock {
 		Placebo.LOGGER.error("##############################");
 		Placebo.LOGGER.error("##############################");
 		Placebo.LOGGER.error("##############################");
-		Placebo.LOGGER.error("A Block {} with BlockEntityType {} has subscribed as a TickingEntityBlock but is not using TickingBlockEntityType!", Registry.BLOCK.getKey(pState.getBlock()), BlockEntityType.getKey(type));
+		Placebo.LOGGER.error("A Block {} with BlockEntityType {} has subscribed as a TickingEntityBlock but is not using TickingBlockEntityType!", BuiltInRegistries.BLOCK.getKey(pState.getBlock()), BlockEntityType.getKey(type));
 		Placebo.LOGGER.error("##############################");
 		Placebo.LOGGER.error("##############################");
 		Placebo.LOGGER.error("##############################");

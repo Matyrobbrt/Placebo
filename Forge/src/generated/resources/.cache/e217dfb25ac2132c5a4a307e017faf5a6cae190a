@@ -1,0 +1,9 @@
+// 1.20.1	2023-07-04T21:45:06.3146075	Tags for minecraft:item mod id placebo
+7e06e915ddb4df932c5814b99c82d4b274bc245b data/placebo/tags/items/dusts/redstone.json
+473d13aed9b3fbca840615f5120be3f5d3c3253e data/placebo/tags/items/gems/diamond.json
+992a325f3c1efcc154430c9dfd41cfa31194b140 data/placebo/tags/items/gems/lapis.json
+1a9c94c7d6c15615ec597206857c57c016734e71 data/placebo/tags/items/glass_panes.json
+104c6c375287fbdc075b25514c34dfc1c4e86c80 data/placebo/tags/items/ingots/gold.json
+804e0d06a5884616735a5dacbb5930eda7d71b00 data/placebo/tags/items/ingots/iron.json
+a70c871de3cd4527315ac17106a36e733152b39e data/placebo/tags/items/ingots/netherite.json
+77c6918da8e2cdf5e260bfdaeb6cbec183ffaadd data/placebo/tags/items/obsidian.json

@@ -8,6 +8,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
 import shadows.placebo.Placebo;
@@ -51,7 +52,7 @@ public class ContainerUtil {
     }
 
     public static <T extends AbstractContainerMenu> MenuType<T> makeType(PosFactory<T> fac) {
-        return new MenuType<>(factory(fac));
+        return new MenuType<>(factory(fac), FeatureFlags.REGISTRY.subset());
     }
 
     public static <T extends AbstractContainerMenu> PlaceboContainerFactory<T> factory(PosFactory<T> fac) {
@@ -59,8 +60,8 @@ public class ContainerUtil {
     }
 
     public static <M extends AbstractContainerMenu> InteractionResult openGui(Player player, BlockPos pos, PosFactory<M> factory) {
-        if (player.level.isClientSide) return InteractionResult.SUCCESS;
-        openScreen((ServerPlayer) player, new SimplerMenuProvider<>(player.level, pos, factory), buf -> buf.writeBlockPos(pos));
+        if (player.level().isClientSide) return InteractionResult.SUCCESS;
+        openScreen((ServerPlayer) player, new SimplerMenuProvider<>(player.level(), pos, factory), buf -> buf.writeBlockPos(pos));
         return InteractionResult.CONSUME;
     }
 

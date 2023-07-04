@@ -17,6 +17,7 @@ import shadows.placebo.Constants;
 import shadows.placebo.block_entity.TickingBlockEntityType;
 import shadows.placebo.block_entity.TickingBlockEntity;
 import shadows.placebo.network.NetworkChannel;
+import shadows.placebo.platform.PlatformType;
 import shadows.placebo.platform.services.IPlatformHelper;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.loading.FMLLoader;
@@ -43,6 +44,11 @@ public class ForgePlatformHelper implements IPlatformHelper {
     public boolean isDevelopmentEnvironment() {
 
         return !FMLLoader.isProduction();
+    }
+
+    @Override
+    public PlatformType getPlatform() {
+        return PlatformType.FORGE;
     }
 
     @Override

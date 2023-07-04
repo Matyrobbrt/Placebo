@@ -104,6 +104,10 @@ minecraft {
     }
 }
 
+repositories {
+    mavenLocal()
+}
+
 sourceSets.main.resources.srcDir 'src/generated/resources'
 
 dependencies {
@@ -111,15 +115,24 @@ dependencies {
     compileOnly(project(":Common")) {
         exclude group: 'net.fabricmc'
     }
+
+    implementation(annotationProcessor("com.github.llamalad7.mixinextras:mixinextras-common:${mixinextras_version}"))
+    implementation(jarJar("com.github.llamalad7.mixinextras:mixinextras-forge:${mixinextras_version}")) {
+        jarJar.ranged(it, "[${mixinextras_version},)")
+    }
+
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
-    jarJar(library('io.github.matyrobbrt:asmutils:0.4.0')) {
-        jarJar.ranged(it, '[0.4.0,1.0.0)')
+    jarJar(library("io.github.matyrobbrt:asmutils:${asmutils_version}")) {
+        jarJar.ranged(it, "[${asmutils_version},1.0.0)")
         transitive = false
     }
-    jarJar(library('io.github.matyrobbrt:eventdispatcher:1.8.0')) {
-        jarJar.ranged(it, '[1.8.0,2.0.0)')
+    jarJar(library("io.github.matyrobbrt:eventdispatcher:${eventdispatcher_version}")) {
+        jarJar.ranged(it, "[${eventdispatcher_version},2.0.0)")
         transitive = false
     }
+
+    runtimeOnly fg.deobf("top.theillusivec4.curios:curios-forge:${top_version}")
+    compileOnly fg.deobf("top.theillusivec4.curios:curios-forge:${top_version}:api")
 }
 
 tasks.named('compileJava', JavaCompile) {
@@ -146,11 +159,21 @@ processResources {
     }
 }
 
+reg.configureJarTask(tasks.jarJar)
+
 reobf {
     jarJar
 }
-tasks.jar.finalizedBy('reobfJar')
-tasks.jarJar.finalizedBy('reobfJarJar')
+
+jar {
+    finalizedBy('reobfJar')
+    archiveClassifier = 'slim'
+}
+
+tasks.jarJar {
+    finalizedBy('reobfJarJar')
+    archiveClassifier = ''
+}
 
 tasks.configureEach {
     if (it.name.startsWith('reobf')) {
@@ -166,6 +189,44 @@ publishing {
             version = project.version
             from components.java
             artifact tasks.jarJar
+
+            pom {
+                withXml { XmlProvider xml ->
+                    final element = xml.asElement()
+                    for (int i = 0; i < element.childNodes.length; i++) {
+                        final child = element.childNodes.item(i)
+                        if (child.nodeName == 'dependencies')
+                            element.removeChild(child)
+                    }
+
+                    final createDependency = { org.w3c.dom.Document owner, String group, String name, String version, String scope ->
+                        var sub = owner.createElement('dependency')
+
+                        var groupEl = owner.createElement('groupId')
+                        groupEl.appendChild(owner.createTextNode(group))
+                        sub.appendChild groupEl
+
+                        var artEl = owner.createElement('artifactId')
+                        artEl.appendChild(owner.createTextNode(name))
+                        sub.appendChild artEl
+
+                        var verEl = owner.createElement('version')
+                        verEl.appendChild(owner.createTextNode(version))
+                        sub.appendChild verEl
+
+                        var scopeEl = owner.createElement('scope')
+                        scopeEl.appendChild(owner.createTextNode(scope))
+                        sub.appendChild scopeEl
+
+                        return sub
+                    }
+
+                    final depsElem = element.getOwnerDocument().createElement('dependencies')
+                    final owner = element.getOwnerDocument()
+                    depsElem.appendChild(createDependency(owner, 'io.github.matyrobbrt', 'eventdispatcher', "${eventdispatcher_version}", 'compile'))
+                    element.appendChild(depsElem)
+                }
+            }
         }
     }
     repositories {

@@ -1,9 +1,12 @@
 package shadows.placebo.loot;
 
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.storage.loot.LootDataId;
+import net.minecraft.world.level.storage.loot.LootDataType;
 import net.minecraft.world.level.storage.loot.LootPool;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.predicates.ExplosionCondition;
@@ -21,7 +24,7 @@ public class LootSystem {
 	/**
 	 * All custom tables to be loaded into the game.
 	 */
-	public static final Map<ResourceLocation, LootTable> PLACEBO_TABLES = new HashMap<>();
+	public static final Map<LootDataId<?>, LootTable> PLACEBO_TABLES = new HashMap<>();
 
 	/**
 	 * Registers a loot table.  Tables should be registered during the {@link FMLCommonSetupEvent}.
@@ -30,8 +33,9 @@ public class LootSystem {
 	 * @param table The table instance.
 	 */
 	public static void registerLootTable(ResourceLocation key, LootTable table) {
-		if (!PLACEBO_TABLES.containsKey(key)) {
-			PLACEBO_TABLES.put(key, table);
+		var trueKey = new LootDataId<>(LootDataType.TABLE, key);
+		if (!PLACEBO_TABLES.containsKey(trueKey)) {
+			PLACEBO_TABLES.put(trueKey, table);
 		} else Placebo.LOGGER.warn("Duplicate loot entry detected, this is not allowed!  Key: " + key);
 	}
 
@@ -55,7 +59,7 @@ public class LootSystem {
 	public static void defaultBlockTable(Block b) {
 		LootTable.Builder builder = tableBuilder();
 		builder.withPool(poolBuilder(1, 1).addEntries(new StackLootEntry(new ItemStack(b))).when(ExplosionCondition.survivesExplosion()));
-		registerLootTable(new ResourceLocation(Registry.BLOCK.getKey(b).getNamespace(), "blocks/" + Registry.BLOCK.getKey(b).getPath()), builder.build());
+		registerLootTable(new ResourceLocation(BuiltInRegistries.BLOCK.getKey(b).getNamespace(), "blocks/" + BuiltInRegistries.BLOCK.getKey(b).getPath()), builder.build());
 	}
 
 }

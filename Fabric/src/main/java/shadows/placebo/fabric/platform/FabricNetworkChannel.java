@@ -7,6 +7,7 @@ import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.IdMapper;
 import net.minecraft.network.FriendlyByteBuf;
@@ -31,15 +32,18 @@ public class FabricNetworkChannel implements NetworkChannel {
         this.name = name;
         ServerPlayNetworking.registerGlobalReceiver(name, (server, player, handler, buf, responseSender) -> handle(buf, () -> new NetworkContext(player, MessageProvider.Direction.C2S)));
         if (Services.PLATFORM.isClient()) {
-            ClientPlayNetworking.registerGlobalReceiver(name, (client, handler, buf, responseSender) -> handle(buf, () -> new NetworkContext(null, MessageProvider.Direction.S2C)));
+            ClientPlayNetworking.registerGlobalReceiver(name, (client, handler, buf, responseSender) -> {
+                Minecraft.getInstance().execute(handle(buf, () -> new NetworkContext(null, MessageProvider.Direction.S2C)));
+            });
         }
     }
 
     @SuppressWarnings("all")
-    private void handle(FriendlyByteBuf buf, Supplier<NetworkContext> contextSupplier) {
+    private Runnable handle(FriendlyByteBuf buf, Supplier<NetworkContext> contextSupplier) {
         final int id = buf.readInt();
         final MessageProvider provider = provides.byIdOrThrow(id);
-        provider.handle(provider.read(buf), Suppliers.memoize(contextSupplier));
+        final Object msg = provider.read(buf);
+        return () -> provider.handle(msg, Suppliers.memoize(contextSupplier));
     }
 
     @Override

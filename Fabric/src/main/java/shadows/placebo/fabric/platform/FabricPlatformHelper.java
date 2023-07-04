@@ -17,6 +17,7 @@ import shadows.placebo.Constants;
 import shadows.placebo.block_entity.TickingBlockEntity;
 import shadows.placebo.block_entity.TickingBlockEntityType;
 import shadows.placebo.network.NetworkChannel;
+import shadows.placebo.platform.PlatformType;
 import shadows.placebo.platform.services.IPlatformHelper;
 
 import java.nio.file.Path;
@@ -40,6 +41,11 @@ public class FabricPlatformHelper implements IPlatformHelper {
     public boolean isDevelopmentEnvironment() {
 
         return FabricLoader.getInstance().isDevelopmentEnvironment();
+    }
+
+    @Override
+    public PlatformType getPlatform() {
+        return PlatformType.FABRIC;
     }
 
     @Override

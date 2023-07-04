@@ -10,6 +10,7 @@ import com.google.gson.JsonSerializer;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.RandomSource;
@@ -33,7 +34,7 @@ public class RandomAttributeModifier {
 	//Formatter::off
 	public static Codec<RandomAttributeModifier> CODEC = RecordCodecBuilder.create(inst -> inst
 		.group(
-			Registry.ATTRIBUTE.byNameCodec().fieldOf("attribute").forGetter(a -> a.attribute),
+			BuiltInRegistries.ATTRIBUTE.byNameCodec().fieldOf("attribute").forGetter(a -> a.attribute),
 			new EnumCodec<>(Operation.class).fieldOf("operation").forGetter(a -> a.op),
 			StepFunction.CODEC.fieldOf("value").forGetter(a -> a.value))
 			.apply(inst, RandomAttributeModifier::new)
@@ -65,7 +66,7 @@ public class RandomAttributeModifier {
 		AttributeModifier modif = genModifier(rand);
 		AttributeInstance inst = entity.getAttribute(this.attribute);
 		if (inst == null) {
-			Placebo.LOGGER.trace(String.format("Attempted to apply a random attribute modifier to an entity (%s) that does not have that attribute (%s)!", EntityType.getKey(entity.getType()), Registry.ATTRIBUTE.getKey(this.attribute)));
+			Placebo.LOGGER.trace(String.format("Attempted to apply a random attribute modifier to an entity (%s) that does not have that attribute (%s)!", EntityType.getKey(entity.getType()), BuiltInRegistries.ATTRIBUTE.getKey(this.attribute)));
 			return;
 		}
 		inst.addPermanentModifier(modif);
@@ -106,7 +107,7 @@ public class RandomAttributeModifier {
 				float v = GsonHelper.getAsFloat(obj, "value");
 				value = new StepFunction(v, 1, 0);
 			}
-			Attribute attribute = Registry.ATTRIBUTE.get(new ResourceLocation(_attribute));
+			Attribute attribute = BuiltInRegistries.ATTRIBUTE.get(new ResourceLocation(_attribute));
 			if (attribute == null || value == null || op == null) throw new JsonParseException("Attempted to deserialize invalid RandomAttributeModifier: " + json.toString());
 			return new RandomAttributeModifier(attribute, op, value);
 		}
@@ -114,7 +115,7 @@ public class RandomAttributeModifier {
 		@Override
 		public JsonElement serialize(RandomAttributeModifier src, Type typeOfSrc, JsonSerializationContext context) {
 			JsonObject obj = new JsonObject();
-			obj.addProperty("attribute", Registry.ATTRIBUTE.getKey(src.attribute).toString());
+			obj.addProperty("attribute", BuiltInRegistries.ATTRIBUTE.getKey(src.attribute).toString());
 			obj.addProperty("operation", src.op.name());
 			StepFunction range = src.value;
 			if (range.min() == range.max()) {

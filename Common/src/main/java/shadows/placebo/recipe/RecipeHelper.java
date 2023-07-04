@@ -8,6 +8,9 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.world.item.crafting.CraftingBookCategory;
 import org.jetbrains.annotations.ApiStatus;
 
 import com.google.common.collect.HashMultimap;
@@ -93,7 +96,7 @@ public final class RecipeHelper {
 		for (int i = 0; i < inputArr.length; i++) {
 			Object input = inputArr[i];
 			if (input instanceof TagKey tag) inputL.add(i, Ingredient.of(tag));
-			else if (input instanceof String str) inputL.add(i, Ingredient.of(TagKey.create(Registry.ITEM_REGISTRY, new ResourceLocation(str))));
+			else if (input instanceof String str) inputL.add(i, Ingredient.of(TagKey.create(Registries.ITEM, new ResourceLocation(str))));
 			else if (input instanceof ItemStack stack && !stack.isEmpty()) inputL.add(i, Ingredient.of(stack));
 			else if (input instanceof ItemLike || input instanceof Supplier<?>) inputL.add(i, Ingredient.of(makeStack(input)));
 			else if (input instanceof Ingredient ing) inputL.add(i, ing);
@@ -148,7 +151,7 @@ public final class RecipeHelper {
 		 * @param rec The recipe to add.
 		 */
 		public void addRecipe(Recipe<?> rec) {
-			if (rec == null || rec.getId() == null || rec.getSerializer() == null || Registry.RECIPE_SERIALIZER.getKey(rec.getSerializer()) == null) {
+			if (rec == null || rec.getId() == null || rec.getSerializer() == null || BuiltInRegistries.RECIPE_SERIALIZER.getKey(rec.getSerializer()) == null) {
 				Placebo.LOGGER.error("Attempted to add an invalid recipe {}.", rec);
 				Thread.dumpStack();
 			}
@@ -165,7 +168,7 @@ public final class RecipeHelper {
 		 */
 		public void addShapeless(Object output, Object... inputs) {
 			ItemStack out = makeStack(output);
-			addRecipe(new ShapelessRecipe(this.name(out), this.modid, out, createInput(modid, false, inputs)));
+			addRecipe(new ShapelessRecipe(this.name(out), this.modid, CraftingBookCategory.MISC, out, createInput(modid, false, inputs)));
 		}
 
 		/**
@@ -185,11 +188,11 @@ public final class RecipeHelper {
 
 		private ShapedRecipe genShaped(ItemStack output, int width, int height, Object... input) {
 			if (width * height != input.length) throw new UnsupportedOperationException("Attempted to add invalid shaped recipe.  Complain to the author of " + this.modid);
-			return new ShapedRecipe(this.name(output), this.modid, width, height, createInput(modid, true, input), output);
+			return new ShapedRecipe(this.name(output), this.modid, CraftingBookCategory.MISC, width, height, createInput(modid, true, input), output);
 		}
 
 		private ResourceLocation name(ItemStack out) {
-			String name = Registry.ITEM.getKey(out.getItem()).getPath();
+			String name = BuiltInRegistries.ITEM.getKey(out.getItem()).getPath();
 			while (MODID_TO_NAMES.get(this.modid).contains(name)) {
 				name += "_";
 			}

@@ -4,14 +4,15 @@ plugins {
     id 'idea'
 }
 
-archivesBaseName = "${mod_name}-common-${minecraft_version}"
+archivesBaseName = "${mod_id}-common-${minecraft_version}"
 
 dependencies {
     minecraft "com.mojang:minecraft:${minecraft_version}"
     mappings loom.officialMojangMappings()
     modImplementation "net.fabricmc:fabric-loader:${fabric_loader_version}" // DON'T TOUCH floader!
     implementation group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.1'
-    implementation 'io.github.matyrobbrt:eventdispatcher:1.8.0'
+    implementation "com.github.llamalad7.mixinextras:mixinextras-common:${mixinextras_version}"
+    implementation "io.github.matyrobbrt:eventdispatcher:${eventdispatcher_version}"
 }
 
 loom {
@@ -32,6 +33,10 @@ tasks.named('remapJar') {
     enabled = false
 }
 
+tasks.named('remapSourcesJar') {
+    enabled = false
+}
+
 tasks.named('jar') {
     archiveClassifier = ''
 }
@@ -43,6 +48,45 @@ publishing {
             artifactId = "placebo-${minecraft_version}"
             version = project.version
             artifact tasks.jar
+            artifact tasks.sourcesJar
+
+            pom {
+                withXml { XmlProvider xml ->
+                    final element = xml.asElement()
+                    for (int i = 0; i < element.childNodes.length; i++) {
+                        final child = element.childNodes.item(i)
+                        if (child.nodeName == 'dependencies')
+                            element.removeChild(child)
+                    }
+
+                    final createDependency = { org.w3c.dom.Document owner, String group, String name, String version, String scope ->
+                        var sub = owner.createElement('dependency')
+
+                        var groupEl = owner.createElement('groupId')
+                        groupEl.appendChild(owner.createTextNode(group))
+                        sub.appendChild groupEl
+
+                        var artEl = owner.createElement('artifactId')
+                        artEl.appendChild(owner.createTextNode(name))
+                        sub.appendChild artEl
+
+                        var verEl = owner.createElement('version')
+                        verEl.appendChild(owner.createTextNode(version))
+                        sub.appendChild verEl
+
+                        var scopeEl = owner.createElement('scope')
+                        scopeEl.appendChild(owner.createTextNode(scope))
+                        sub.appendChild scopeEl
+
+                        return sub
+                    }
+
+                    final depsElem = element.getOwnerDocument().createElement('dependencies')
+                    final owner = element.getOwnerDocument()
+                    depsElem.appendChild(createDependency(owner, 'io.github.matyrobbrt', 'eventdispatcher', "${eventdispatcher_version}", 'compile'))
+                    element.appendChild(depsElem)
+                }
+            }
         }
     }
     repositories {
